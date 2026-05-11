@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:movewell/core/theme/colors.dart';
-import 'package:movewell/core/services/chat_service.dart';
-
-import 'package:mobile_scanner/mobile_scanner.dart'
-    if (dart.library.html) 'package:mobile_scanner/mobile_scanner.dart';
 
 class DoctorQrScannerScreen extends StatefulWidget {
   const DoctorQrScannerScreen({super.key});
@@ -14,42 +11,17 @@ class DoctorQrScannerScreen extends StatefulWidget {
 }
 
 class _DoctorQrScannerScreenState extends State<DoctorQrScannerScreen> {
-  final ChatService _chatService = ChatService();
-  final TextEditingController _manualIdController = TextEditingController();
-  final TextEditingController _manualNameController = TextEditingController();
-  final TextEditingController _manualEmailController = TextEditingController();
-  
-  MobileScannerController? _cameraController;
+  final MobileScannerController _controller = MobileScannerController();
   bool _hasScanned = false;
-  bool _isManualMode = false;
-  bool _isSubmitting = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _initCamera();
-  }
-
-  void _initCamera() {
-    if (!mounted) return;
-    _cameraController = MobileScannerController(
-      detectionSpeed: DetectionSpeed.normal,
-      facing: CameraFacing.back,
-    );
-  }
 
   @override
   void dispose() {
-    _cameraController?.dispose();
-    _manualIdController.dispose();
-    _manualNameController.dispose();
-    _manualEmailController.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
   void _onDetect(BarcodeCapture capture) {
-    if (_hasScanned || !mounted) return;
-    
+    if (_hasScanned) return;
     final barcode = capture.barcodes.firstOrNull;
     if (barcode == null || barcode.rawValue == null) return;
 
@@ -62,56 +34,36 @@ class _DoctorQrScannerScreenState extends State<DoctorQrScannerScreen> {
     }
 
     setState(() => _hasScanned = true);
-    _cameraController?.stop();
+    _controller.stop();
 
     final parts = data.split('|');
-    final patientId = parts.length > 1 ? parts[1] : '';
-    final name = parts.length > 2 ? parts[2] : 'Unknown';
-    final email = parts.length > 3 ? parts[3] : '';
+    final name = parts.length > 1 ? parts[1] : 'Unknown';
+    final email = parts.length > 2 ? parts[2] : '';
+    final bloodType = parts.length > 3 ? parts[3] : 'N/A';
+    final height = parts.length > 4 ? parts[4] : 'N/A';
+    final weight = parts.length > 5 ? parts[5] : 'N/A';
+    final diagnosis = parts.length > 6 ? parts[6] : 'N/A';
+    final emergency = parts.length > 7 ? parts[7] : 'N/A';
 
-    _showPatientFoundSheet(patientId: patientId, name: name, email: email);
-  }
-
-  Future<void> _addPatientManually() async {
-    final patientId = _manualIdController.text.trim();
-    final name = _manualNameController.text.trim();
-    final email = _manualEmailController.text.trim();
-
-    if (name.isEmpty || email.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter patient name and email')),
-      );
-      return;
-    }
-
-    setState(() => _isSubmitting = true);
-
-    try {
-      final finalPatientId = patientId.isNotEmpty ? patientId : 'temp_${DateTime.now().millisecondsSinceEpoch}';
-      await _chatService.createConversation(finalPatientId);
-      
-      if (mounted) {
-        setState(() => _isSubmitting = false);
-        setState(() => _isManualMode = false);
-        Navigator.pop(context, true);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('$name added to your patients.')),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() => _isSubmitting = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to add patient: $e')),
-        );
-      }
-    }
+    _showPatientFoundSheet(
+      name: name,
+      email: email,
+      bloodType: bloodType,
+      height: height,
+      weight: weight,
+      diagnosis: diagnosis,
+      emergency: emergency,
+    );
   }
 
   void _showPatientFoundSheet({
-    required String patientId,
     required String name,
     required String email,
+    required String bloodType,
+    required String height,
+    required String weight,
+    required String diagnosis,
+    required String emergency,
   }) {
     showModalBottomSheet(
       context: context,
@@ -167,6 +119,13 @@ class _DoctorQrScannerScreenState extends State<DoctorQrScannerScreen> {
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.04),
+                        blurRadius: 12,
+                        offset: const Offset(0, 3),
+                      ),
+                    ],
                   ),
                   child: Column(
                     children: [
@@ -199,6 +158,14 @@ class _DoctorQrScannerScreenState extends State<DoctorQrScannerScreen> {
                           color: AppColors.textMuted,
                         ),
                       ),
+                      const SizedBox(height: 16),
+                      const Divider(color: AppColors.border),
+                      const SizedBox(height: 12),
+                      _buildDetailRow('Diagnosis', diagnosis),
+                      _buildDetailRow('Blood Type', bloodType),
+                      _buildDetailRow('Height', height),
+                      _buildDetailRow('Weight', weight),
+                      _buildDetailRow('Emergency', emergency),
                     ],
                   ),
                 ),
@@ -206,25 +173,15 @@ class _DoctorQrScannerScreenState extends State<DoctorQrScannerScreen> {
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: () async {
+                    onPressed: () {
                       Navigator.pop(ctx);
-                      try {
-                        if (patientId.isNotEmpty) {
-                          await _chatService.createConversation(patientId);
-                        }
-                        if (mounted) {
-                          Navigator.pop(context, true);
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('$name added to your patients.')),
-                          );
-                        }
-                      } catch (e) {
-                        if (mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Failed to add patient: $e')),
-                          );
-                        }
-                      }
+                      Navigator.pop(context, true);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('$name added to your patients.'),
+                          backgroundColor: const Color(0xFF4ECDC4),
+                        ),
+                      );
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
@@ -248,7 +205,7 @@ class _DoctorQrScannerScreenState extends State<DoctorQrScannerScreen> {
                   onPressed: () {
                     Navigator.pop(ctx);
                     setState(() => _hasScanned = false);
-                    _cameraController?.start();
+                    _controller.start();
                   },
                   child: Text(
                     'Scan Again',
@@ -267,98 +224,45 @@ class _DoctorQrScannerScreenState extends State<DoctorQrScannerScreen> {
     );
   }
 
-  Widget _buildManualEntryForm() {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: Text(
-          'Add Patient Manually',
-          style: GoogleFonts.leagueSpartan(fontWeight: FontWeight.w600),
-        ),
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => setState(() => _isManualMode = false),
-        ),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          children: [
-            const SizedBox(height: 20),
-            TextField(
-              controller: _manualIdController,
-              decoration: const InputDecoration(
-                labelText: 'Patient ID (Optional)',
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.badge),
+  Widget _buildDetailRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 90,
+            child: Text(
+              label,
+              style: GoogleFonts.leagueSpartan(
+                fontSize: 13,
+                color: AppColors.textMuted,
               ),
             ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _manualNameController,
-              decoration: const InputDecoration(
-                labelText: 'Full Name *',
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.person),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: GoogleFonts.leagueSpartan(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textPrimary,
               ),
             ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _manualEmailController,
-              decoration: const InputDecoration(
-                labelText: 'Email Address *',
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.email),
-              ),
-              keyboardType: TextInputType.emailAddress,
-            ),
-            const SizedBox(height: 32),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: _isSubmitting ? null : _addPatientManually,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                ),
-                child: _isSubmitting
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : Text(
-                        'Add Patient',
-                        style: GoogleFonts.leagueSpartan(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_isManualMode) {
-      return _buildManualEntryForm();
-    }
-
     return Scaffold(
       backgroundColor: Colors.black,
       body: Stack(
         children: [
           MobileScanner(
-            controller: _cameraController!,
+            controller: _controller,
             onDetect: _onDetect,
           ),
           _buildOverlay(),
@@ -373,10 +277,14 @@ class _DoctorQrScannerScreenState extends State<DoctorQrScannerScreen> {
                       width: 44,
                       height: 44,
                       decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.5),
+                        color: Colors.white.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: const Icon(Icons.arrow_back, color: Colors.white, size: 20),
+                      child: const Icon(
+                        Icons.arrow_back_ios_new_rounded,
+                        color: Colors.white,
+                        size: 20,
+                      ),
                     ),
                   ),
                   const Spacer(),
@@ -389,29 +297,7 @@ class _DoctorQrScannerScreenState extends State<DoctorQrScannerScreen> {
                     ),
                   ),
                   const Spacer(),
-                  GestureDetector(
-                    onTap: () => setState(() => _isManualMode = true),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.edit, color: Colors.white, size: 18),
-                          const SizedBox(width: 4),
-                          Text(
-                            'Manual',
-                            style: GoogleFonts.leagueSpartan(
-                              fontSize: 14,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+                  const SizedBox(width: 44),
                 ],
               ),
             ),
@@ -424,7 +310,7 @@ class _DoctorQrScannerScreenState extends State<DoctorQrScannerScreen> {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                 decoration: BoxDecoration(
-                  color: Colors.black.withValues(alpha: 0.7),
+                  color: Colors.black.withValues(alpha: 0.6),
                   borderRadius: BorderRadius.circular(24),
                 ),
                 child: Text(
@@ -450,64 +336,122 @@ class _DoctorQrScannerScreenState extends State<DoctorQrScannerScreen> {
         final left = (constraints.maxWidth - scanSize) / 2;
         final top = (constraints.maxHeight - scanSize) / 2 - 30;
 
-        return IgnorePointer(
-          child: CustomPaint(
-            size: Size(constraints.maxWidth, constraints.maxHeight),
-            painter: ScannerOverlayPainter(
-              scanRect: Rect.fromLTWH(left, top, scanSize, scanSize),
-              cornerColor: AppColors.primary,
+        return Stack(
+          children: [
+            ColorFiltered(
+              colorFilter: ColorFilter.mode(
+                Colors.black.withValues(alpha: 0.5),
+                BlendMode.srcOut,
+              ),
+              child: Stack(
+                children: [
+                  Container(
+                    decoration: const BoxDecoration(
+                      color: Colors.black,
+                      backgroundBlendMode: BlendMode.dstOut,
+                    ),
+                  ),
+                  Positioned(
+                    left: left,
+                    top: top,
+                    child: Container(
+                      width: scanSize,
+                      height: scanSize,
+                      decoration: BoxDecoration(
+                        color: Colors.red,
+                        borderRadius: BorderRadius.circular(24),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
+            Positioned(
+              left: left - 2,
+              top: top - 2,
+              child: _buildCorner(true, true),
+            ),
+            Positioned(
+              right: left - 2,
+              top: top - 2,
+              child: _buildCorner(false, true),
+            ),
+            Positioned(
+              left: left - 2,
+              bottom: constraints.maxHeight - top - scanSize - 2,
+              child: _buildCorner(true, false),
+            ),
+            Positioned(
+              right: left - 2,
+              bottom: constraints.maxHeight - top - scanSize - 2,
+              child: _buildCorner(false, false),
+            ),
+          ],
         );
       },
     );
   }
+
+  Widget _buildCorner(bool isLeft, bool isTop) {
+    return SizedBox(
+      width: 32,
+      height: 32,
+      child: CustomPaint(
+        painter: _CornerPainter(
+          isLeft: isLeft,
+          isTop: isTop,
+          color: AppColors.primary,
+        ),
+      ),
+    );
+  }
 }
 
-class ScannerOverlayPainter extends CustomPainter {
-  final Rect scanRect;
-  final Color cornerColor;
+class _CornerPainter extends CustomPainter {
+  final bool isLeft;
+  final bool isTop;
+  final Color color;
 
-  ScannerOverlayPainter({
-    required this.scanRect,
-    required this.cornerColor,
+  _CornerPainter({
+    required this.isLeft,
+    required this.isTop,
+    required this.color,
   });
 
   @override
   void paint(Canvas canvas, Size size) {
-    // Dark overlay
-    final overlayPaint = Paint()..color = Colors.black.withValues(alpha: 0.6);
-    final overlayPath = Path()
-      ..addRect(Rect.fromLTWH(0, 0, size.width, size.height))
-      ..addRect(scanRect)
-      ..fillType = PathFillType.evenOdd;
-    canvas.drawPath(overlayPath, overlayPaint);
-
-    // Draw corners
-    final cornerPaint = Paint()
-      ..color = cornerColor
+    final paint = Paint()
+      ..color = color
       ..strokeWidth = 4
+      ..strokeCap = StrokeCap.round
       ..style = PaintingStyle.stroke;
 
-    const cornerLength = 30.0;
-    
-    // Top-left
-    canvas.drawLine(Offset(scanRect.left, scanRect.top + cornerLength), Offset(scanRect.left, scanRect.top), cornerPaint);
-    canvas.drawLine(Offset(scanRect.left, scanRect.top), Offset(scanRect.left + cornerLength, scanRect.top), cornerPaint);
+    final path = Path();
+    if (isLeft && isTop) {
+      path.moveTo(0, size.height);
+      path.lineTo(0, 8);
+      path.quadraticBezierTo(0, 0, 8, 0);
+      path.lineTo(size.width, 0);
+    } else if (!isLeft && isTop) {
+      path.moveTo(0, 0);
+      path.lineTo(size.width - 8, 0);
+      path.quadraticBezierTo(size.width, 0, size.width, 8);
+      path.lineTo(size.width, size.height);
+    } else if (isLeft && !isTop) {
+      path.moveTo(0, 0);
+      path.lineTo(0, size.height - 8);
+      path.quadraticBezierTo(0, size.height, 8, size.height);
+      path.lineTo(size.width, size.height);
+    } else {
+      path.moveTo(size.width, 0);
+      path.lineTo(size.width, size.height - 8);
+      path.quadraticBezierTo(size.width, size.height, size.width - 8, size.height);
+      path.lineTo(0, size.height);
+    }
 
-    // Top-right
-    canvas.drawLine(Offset(scanRect.right, scanRect.top + cornerLength), Offset(scanRect.right, scanRect.top), cornerPaint);
-    canvas.drawLine(Offset(scanRect.right, scanRect.top), Offset(scanRect.right - cornerLength, scanRect.top), cornerPaint);
-
-    // Bottom-left
-    canvas.drawLine(Offset(scanRect.left, scanRect.bottom - cornerLength), Offset(scanRect.left, scanRect.bottom), cornerPaint);
-    canvas.drawLine(Offset(scanRect.left, scanRect.bottom), Offset(scanRect.left + cornerLength, scanRect.bottom), cornerPaint);
-
-    // Bottom-right
-    canvas.drawLine(Offset(scanRect.right, scanRect.bottom - cornerLength), Offset(scanRect.right, scanRect.bottom), cornerPaint);
-    canvas.drawLine(Offset(scanRect.right, scanRect.bottom), Offset(scanRect.right - cornerLength, scanRect.bottom), cornerPaint);
+    canvas.drawPath(path, paint);
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
