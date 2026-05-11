@@ -1,0 +1,72 @@
+
+{
+  "neck_pain": [
+    {
+      "name": "Neck Stretch",
+      "description": "Gently tilt your head to each side, holding for 15 seconds",
+      "videoUrl": "https://youtu.be/example1",
+      "difficulty": "beginner",
+      "duration": 5
+    },
+    {
+      "name": "Chin Tuck",
+      "description": "Pull your chin straight back, creating a double chin",
+      "videoUrl": "https://youtu.be/example2",
+      "difficulty": "beginner",
+      "duration": 3
+    },
+    {
+      "name": "Neck Rotation",
+      "description": "Slowly turn your head left and right",
+      "videoUrl": "https://youtu.be/example3",
+      "difficulty": "beginner",
+      "duration": 4
+    }
+  ],
+  "back_pain": [
+    {
+      "name": "Child's Pose",
+      "description": "Kneel on the floor, sit back on your heels, reach arms forward",
+      "videoUrl": "https://youtu.be/example6",
+      "difficulty": "beginner",
+      "duration": 30
+    },
+    {
+      "name": "Cat Cow Stretch",
+      "description": "On hands and knees, alternate between arching and rounding your back",
+      "videoUrl": "https://youtu.be/example7",
+      "difficulty": "beginner",
+      "duration": 10
+    },
+    {
+      "name": "Pelvic Tilt",
+      "description": "Lie on your back, flatten your lower back against the floor",
+      "videoUrl": "https://youtu.be/example8",
+      "difficulty": "beginner",
+      "duration": 5
+    }
+  ],
+  "knee_pain": [
+    {
+      "name": "Straight Leg Raise",
+      "description": "Lie on your back, lift straight leg to 45 degrees",
+      "videoUrl": "https://youtu.be/example11",
+      "difficulty": "beginner",
+      "duration": 10
+    },
+    {
+      "name": "Hamstring Stretch",
+      "description": "Sit with leg straight, reach toward toes",
+      "videoUrl": "https://youtu.be/example12",
+      "difficulty": "beginner",
+      "duration": 15
+    },
+    {
+      "name": "Quad Stretch",
+      "description": "Standing, pull heel toward glutes",
+      "videoUrl": "https://youtu.be/example13",
+      "difficulty": "intermediate",
+      "duration": 15
+    }
+  ]
+}
