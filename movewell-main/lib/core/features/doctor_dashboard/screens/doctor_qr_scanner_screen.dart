@@ -3,7 +3,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:movewell/core/theme/colors.dart';
 import 'package:movewell/core/services/chat_service.dart';
 
-// Conditional imports for camera support
 import 'package:mobile_scanner/mobile_scanner.dart'
     if (dart.library.html) 'package:mobile_scanner/mobile_scanner.dart';
 
