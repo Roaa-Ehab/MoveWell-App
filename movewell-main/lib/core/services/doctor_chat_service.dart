@@ -31,10 +31,11 @@ class DoctorChatService {
     }
   }
 
-  Future<Map<String, dynamic>> createConversation(String doctorId) async {
+  // For DOCTOR creating conversation with PATIENT
+  Future<Map<String, dynamic>> createConversation(String patientId) async {
     try {
       final response = await _dio.post('/chat/conversations', data: {
-        'doctorId': doctorId,
+        'patientId': patientId,  // ← Send patientId, not doctorId
       });
       return response.data;
     } catch (e) {

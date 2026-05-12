@@ -71,10 +71,14 @@ router.post("/messages", protect, async (req, res) => {
 
 router.post("/conversations", protect, async (req, res) => {
   try {
-    const { doctorId } = req.body;
+    const { doctorId, patientId } = req.body;
+    
+    // If patient is creating (sends doctorId)
+    // If doctor is creating (sends patientId)
+    const otherParticipantId = doctorId || patientId;
     
     const existingConversation = await Conversation.findOne({
-      participants: { $all: [req.user._id, doctorId] }
+      participants: { $all: [req.user._id, otherParticipantId] }
     });
     
     if (existingConversation) {
@@ -82,7 +86,7 @@ router.post("/conversations", protect, async (req, res) => {
     }
     
     const conversation = await Conversation.create({
-      participants: [req.user._id, doctorId],
+      participants: [req.user._id, otherParticipantId],
     });
     
     res.status(201).json(conversation);

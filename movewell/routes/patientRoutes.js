@@ -76,6 +76,63 @@ router.get("/", protect, doctorOnly, async (req, res) => {
   }
 });
 
+// Get patient by email (for QR scan)
+router.get("/by-email/:email", protect, async (req, res) => {
+  try {
+    const { email } = req.params;
+    const user = await User.findOne({ email, role: "patient" }).select("-password");
+    if (!user) {
+      return res.status(404).json({ message: "Patient not found" });
+    }
+    
+    const patientProfile = await Patient.findOne({ userId: user._id });
+    
+    res.json({
+      _id: patientProfile?._id,
+      userId: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+      },
+      age: patientProfile?.age || null,
+      weight: patientProfile?.weight || null,
+      height: patientProfile?.height || null,
+      injuryType: patientProfile?.injuryType || "",
+      bloodType: patientProfile?.bloodType || "",
+      emergencyContact: patientProfile?.emergencyContact || "",
+      status: patientProfile?.status || "active",
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// Add patient to doctor's list (create conversation)
+router.post("/:patientId/link-doctor", protect, doctorOnly, async (req, res) => {
+  try {
+    const { patientId } = req.params;
+    
+    const existingConversation = await Conversation.findOne({
+      participants: { $all: [req.user._id, patientId] }
+    });
+    
+    if (existingConversation) {
+      return res.json({ message: "Already in your patients", conversation: existingConversation });
+    }
+    
+    const conversation = await Conversation.create({
+      participants: [req.user._id, patientId],
+    });
+    
+    res.json({ message: "Patient added", conversation });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 router.get("/:id", protect, getPatientById);
 
 router.patch("/:id/status", protect, doctorOnly, async (req, res) => {

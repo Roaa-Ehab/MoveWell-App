@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:movewell/core/theme/colors.dart';
+import 'package:movewell/core/services/doctor_service.dart';
 
 class DoctorQrScannerScreen extends StatefulWidget {
   const DoctorQrScannerScreen({super.key});
@@ -12,6 +13,7 @@ class DoctorQrScannerScreen extends StatefulWidget {
 
 class _DoctorQrScannerScreenState extends State<DoctorQrScannerScreen> {
   final MobileScannerController _controller = MobileScannerController();
+  final DoctorService _doctorService = DoctorService();
   bool _hasScanned = false;
 
   @override
@@ -20,7 +22,7 @@ class _DoctorQrScannerScreenState extends State<DoctorQrScannerScreen> {
     super.dispose();
   }
 
-  void _onDetect(BarcodeCapture capture) {
+  Future<void> _onDetect(BarcodeCapture capture) async {
     if (_hasScanned) return;
     final barcode = capture.barcodes.firstOrNull;
     if (barcode == null || barcode.rawValue == null) return;
@@ -37,34 +39,43 @@ class _DoctorQrScannerScreenState extends State<DoctorQrScannerScreen> {
     _controller.stop();
 
     final parts = data.split('|');
-    final name = parts.length > 1 ? parts[1] : 'Unknown';
     final email = parts.length > 2 ? parts[2] : '';
-    final bloodType = parts.length > 3 ? parts[3] : 'N/A';
-    final height = parts.length > 4 ? parts[4] : 'N/A';
-    final weight = parts.length > 5 ? parts[5] : 'N/A';
-    final diagnosis = parts.length > 6 ? parts[6] : 'N/A';
-    final emergency = parts.length > 7 ? parts[7] : 'N/A';
 
-    _showPatientFoundSheet(
-      name: name,
-      email: email,
-      bloodType: bloodType,
-      height: height,
-      weight: weight,
-      diagnosis: diagnosis,
-      emergency: emergency,
-    );
+    if (email.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Invalid QR: No email found')),
+      );
+      setState(() => _hasScanned = false);
+      _controller.start();
+      return;
+    }
+
+    try {
+      final patientData = await _doctorService.getPatientByEmail(email);
+      if (mounted) {
+        _showPatientFoundSheet(patientData);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Patient not found: $e')),
+        );
+        setState(() => _hasScanned = false);
+        _controller.start();
+      }
+    }
   }
 
-  void _showPatientFoundSheet({
-    required String name,
-    required String email,
-    required String bloodType,
-    required String height,
-    required String weight,
-    required String diagnosis,
-    required String emergency,
-  }) {
+  void _showPatientFoundSheet(Map<String, dynamic> patient) async {
+    final patientUserId = patient['userId']['_id'];
+    final patientName = patient['userId']['name'] ?? 'Patient';
+    final patientEmail = patient['userId']['email'] ?? '';
+    final diagnosis = patient['injuryType'] ?? 'Not specified';
+    final bloodType = patient['bloodType'] ?? 'N/A';
+    final height = patient['height'] != null ? '${patient['height']} cm' : 'N/A';
+    final weight = patient['weight'] != null ? '${patient['weight']} kg' : 'N/A';
+    final emergency = patient['emergencyContact'] ?? 'N/A';
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -133,7 +144,7 @@ class _DoctorQrScannerScreenState extends State<DoctorQrScannerScreen> {
                         radius: 28,
                         backgroundColor: AppColors.surface,
                         child: Text(
-                          name.isNotEmpty ? name[0] : '?',
+                          patientName.isNotEmpty ? patientName[0] : '?',
                           style: GoogleFonts.leagueSpartan(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
@@ -143,7 +154,7 @@ class _DoctorQrScannerScreenState extends State<DoctorQrScannerScreen> {
                       ),
                       const SizedBox(height: 12),
                       Text(
-                        name,
+                        patientName,
                         style: GoogleFonts.leagueSpartan(
                           fontSize: 18,
                           fontWeight: FontWeight.w700,
@@ -152,7 +163,7 @@ class _DoctorQrScannerScreenState extends State<DoctorQrScannerScreen> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        email,
+                        patientEmail,
                         style: GoogleFonts.leagueSpartan(
                           fontSize: 13,
                           color: AppColors.textMuted,
@@ -173,15 +184,33 @@ class _DoctorQrScannerScreenState extends State<DoctorQrScannerScreen> {
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: () {
+                    onPressed: () async {
                       Navigator.pop(ctx);
-                      Navigator.pop(context, true);
+                      
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('$name added to your patients.'),
-                          backgroundColor: const Color(0xFF4ECDC4),
-                        ),
+                        const SnackBar(content: Text('Adding patient...')),
                       );
+                      
+                      try {
+                        await _doctorService.addPatientToMyList(patientUserId);
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('$patientName added to your patients.'),
+                              backgroundColor: const Color(0xFF4ECDC4),
+                            ),
+                          );
+                          Navigator.pop(context, true);
+                        }
+                      } catch (e) {
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Failed to add patient: $e')),
+                          );
+                          setState(() => _hasScanned = false);
+                          _controller.start();
+                        }
+                      }
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,

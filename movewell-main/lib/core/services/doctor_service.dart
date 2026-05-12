@@ -22,6 +22,24 @@ class DoctorService {
     }
   }
 
+  Future<Map<String, dynamic>> getPatientByEmail(String email) async {
+    try {
+      final response = await _dio.get('/patients/by-email/$email');
+      return response.data;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<Map<String, dynamic>> addPatientToMyList(String patientUserId) async {
+    try {
+      final response = await _dio.post('/patients/$patientUserId/link-doctor');
+      return response.data;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<List<dynamic>> getSchedule() async {
     try {
       final response = await _dio.get('/appointments');

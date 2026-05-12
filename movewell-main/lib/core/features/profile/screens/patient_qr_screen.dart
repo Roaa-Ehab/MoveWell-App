@@ -13,7 +13,7 @@ class PatientQrScreen extends StatelessWidget {
     final authProvider = Provider.of<AuthProvider>(context);
     final name = authProvider.userName;
     final email = authProvider.userEmail;
-    return 'MOVEWELL_PATIENT|$name|$email|A+|165 cm|62 kg|Shoulder Injury|Emergency Contact';
+    return 'MOVEWELL_PATIENT|$name|$email';
   }
 
   @override
@@ -180,10 +180,9 @@ class PatientQrScreen extends StatelessWidget {
                                   ),
                                 ),
                                 const SizedBox(height: 12),
-                                _buildInfoRow(Icons.person_outline, 'Your name & contact'),
-                                _buildInfoRow(Icons.water_drop_outlined, 'Blood type & vitals'),
-                                _buildInfoRow(Icons.medical_information_outlined, 'Primary diagnosis'),
-                                _buildInfoRow(Icons.emergency_outlined, 'Emergency contact'),
+                                _buildInfoRow(Icons.person_outline, 'Your name & email'),
+                                _buildInfoRow(Icons.medical_information_outlined, 'Your doctor can access your full profile'),
+                                _buildInfoRow(Icons.security_rounded, 'Secure & encrypted'),
                               ],
                             ),
                           ),

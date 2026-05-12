@@ -172,7 +172,7 @@ class _DoctorPatientsScreenState extends State<DoctorPatientsScreen> {
                               context,
                               MaterialPageRoute(builder: (_) => const DoctorQrScannerScreen()),
                             );
-                            if (result == true) {
+                            if (result == true && mounted) {
                               _loadPatients();
                             }
                           },
@@ -324,7 +324,7 @@ class _DoctorPatientsScreenState extends State<DoctorPatientsScreen> {
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
-                                  'When patients message you, they will appear here',
+                                  'Scan a patient QR code to add them',
                                   style: GoogleFonts.leagueSpartan(
                                     fontSize: 12,
                                     color: AppColors.textHint,
