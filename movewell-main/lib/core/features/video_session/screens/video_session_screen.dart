@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
-import 'package:movewell/core/theme/colors.dart';
 import 'package:movewell/core/services/agora_service.dart';
 
 class VideoSessionScreen extends StatefulWidget {
@@ -101,6 +100,7 @@ class _VideoSessionScreenState extends State<VideoSessionScreen> {
       backgroundColor: Colors.black,
       body: Stack(
         children: [
+          // REMOTE VIDEO - The other person
           Positioned.fill(
             child: _remoteUid != null && _agora.engine != null && _isConnected
                 ? AgoraVideoView(
@@ -142,7 +142,7 @@ class _VideoSessionScreenState extends State<VideoSessionScreen> {
                             width: 28,
                             height: 28,
                             child: CircularProgressIndicator(
-                              color: AppColors.primary,
+                              color: Color(0xFF0970AC),
                               strokeWidth: 2.5,
                             ),
                           ),
@@ -152,18 +152,19 @@ class _VideoSessionScreenState extends State<VideoSessionScreen> {
                   ),
           ),
 
+          // LOCAL VIDEO - Yourself (small overlay)
           Positioned(
-            top: MediaQuery.paddingOf(context).top + 20,
+            top: MediaQuery.of(context).padding.top + 20,
             right: 20,
             child: GestureDetector(
               onTap: () => _agora.switchCamera(),
               child: Container(
-                width: 100,
-                height: 140,
+                width: 120,
+                height: 160,
                 decoration: BoxDecoration(
                   color: Colors.grey[900],
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.white.withValues(alpha: 0.2), width: 2),
+                  border: Border.all(color: Colors.white.withValues(alpha: 0.3), width: 2),
                 ),
                 clipBehavior: Clip.hardEdge,
                 child: _isCamOn && _agora.engine != null && _isConnected
@@ -174,14 +175,15 @@ class _VideoSessionScreenState extends State<VideoSessionScreen> {
                         ),
                       )
                     : const Center(
-                        child: Icon(Icons.videocam_off_rounded, size: 28, color: Colors.grey),
+                        child: Icon(Icons.videocam_off_rounded, size: 40, color: Colors.grey),
                       ),
               ),
             ),
           ),
 
+          // BACK BUTTON
           Positioned(
-            top: MediaQuery.paddingOf(context).top + 20,
+            top: MediaQuery.of(context).padding.top + 20,
             left: 20,
             child: GestureDetector(
               onTap: () => _endCall(),
@@ -192,15 +194,15 @@ class _VideoSessionScreenState extends State<VideoSessionScreen> {
                   color: Colors.black.withValues(alpha: 0.5),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(Icons.arrow_back_ios_new_rounded,
-                    color: Colors.white, size: 20),
+                child: const Icon(Icons.close_rounded, color: Colors.white, size: 24),
               ),
             ),
           ),
 
+          // CONNECTION BADGE
           if (_remoteUid != null && _isConnected)
             Positioned(
-              top: MediaQuery.paddingOf(context).top + 76,
+              top: MediaQuery.of(context).padding.top + 76,
               left: 20,
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -233,6 +235,7 @@ class _VideoSessionScreenState extends State<VideoSessionScreen> {
               ),
             ),
 
+          // CALL CONTROLS
           Positioned(
             bottom: 40,
             left: 0,
@@ -244,7 +247,7 @@ class _VideoSessionScreenState extends State<VideoSessionScreen> {
                   _isMicOn ? Icons.mic_rounded : Icons.mic_off_rounded,
                   _isMicOn
                       ? Colors.white.withValues(alpha: 0.2)
-                      : AppColors.sos.withValues(alpha: 0.8),
+                      : const Color(0xFFE12E2E).withValues(alpha: 0.8),
                   onTap: () {
                     _agora.toggleMic();
                     setState(() => _isMicOn = _agora.isMicOn);
@@ -253,7 +256,7 @@ class _VideoSessionScreenState extends State<VideoSessionScreen> {
                 const SizedBox(width: 20),
                 _buildControlButton(
                   Icons.call_end_rounded,
-                  AppColors.sos,
+                  const Color(0xFFE12E2E),
                   padding: 20,
                   iconSize: 32,
                   onTap: () => _endCall(),
@@ -263,7 +266,7 @@ class _VideoSessionScreenState extends State<VideoSessionScreen> {
                   _isCamOn ? Icons.videocam_rounded : Icons.videocam_off_rounded,
                   _isCamOn
                       ? Colors.white.withValues(alpha: 0.2)
-                      : AppColors.sos.withValues(alpha: 0.8),
+                      : const Color(0xFFE12E2E).withValues(alpha: 0.8),
                   onTap: () {
                     _agora.toggleCamera();
                     setState(() => _isCamOn = _agora.isCamOn);
@@ -279,6 +282,7 @@ class _VideoSessionScreenState extends State<VideoSessionScreen> {
             ),
           ),
 
+          // WAITING MESSAGE
           if (_remoteUid == null && !_isJoining && _isConnected)
             Positioned(
               bottom: 110,
