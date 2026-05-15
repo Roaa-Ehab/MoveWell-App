@@ -49,6 +49,14 @@ class AgoraService {
       },
       onUserJoined: (RtcConnection connection, int remoteUid, int elapsed) {
         _remoteUid = remoteUid;
+        // CRITICAL FIX: Set up remote video view
+        _engine?.setupRemoteVideo(
+          VideoCanvas(
+            uid: remoteUid,
+            view: null,
+            renderMode: RenderModeType.renderModeFit,
+          ),
+        );
         onRemoteUserJoined?.call(remoteUid);
       },
       onUserOffline: (RtcConnection connection, int remoteUid,
@@ -76,6 +84,10 @@ class AgoraService {
     }
 
     _remoteUid = null;
+
+    // Ensure camera is enabled before joining
+    await _engine!.muteLocalVideoStream(false);
+    await _engine!.muteLocalAudioStream(false);
 
     await _engine!.joinChannel(
       token: '',
