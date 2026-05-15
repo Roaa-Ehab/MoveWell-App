@@ -3,6 +3,7 @@ import 'package:movewell/core/network/api_client.dart';
 import 'package:file_picker/file_picker.dart';
 
 class ReportService {
+  
   final Dio _dio = ApiClient().dio;
 
   Future<List<dynamic>> getMyReports() async {
@@ -48,5 +49,31 @@ class ReportService {
       ),
     );
     return response.data;
+  }
+
+  Future<Map<String, dynamic>> getReportById(String reportId) async {
+    try {
+      final response = await _dio.get('/reports/$reportId');
+      return response.data;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> deleteReport(String reportId) async {
+    try {
+      await _dio.delete('/reports/$reportId');
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<List<dynamic>> getReportsByPatient(String patientId) async {
+    try {
+      final response = await _dio.get('/reports/patient/$patientId');
+      return response.data;
+    } catch (e) {
+      return [];
+    }
   }
 }

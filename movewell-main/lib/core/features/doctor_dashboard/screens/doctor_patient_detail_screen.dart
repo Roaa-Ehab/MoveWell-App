@@ -87,7 +87,7 @@ class _DoctorPatientDetailScreenState extends State<DoctorPatientDetailScreen> {
   }
 
   void _openDocument(String fileUrl) {
-    final fullUrl = 'http://127.0.0.1:5000$fileUrl';
+    final fullUrl = 'https://smashup-marshy-kindly.ngrok-free.dev$fileUrl';
     final Uri uri = Uri.parse(fullUrl);
     _launchUrl(uri);
   }

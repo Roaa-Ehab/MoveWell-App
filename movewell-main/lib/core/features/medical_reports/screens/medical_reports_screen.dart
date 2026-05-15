@@ -4,8 +4,10 @@ import 'package:movewell/core/theme/colors.dart';
 import 'package:movewell/core/widgets/header_background.dart';
 import 'package:movewell/core/services/report_service.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:url_launcher/url_launcher.dart';
-
+import 'package:dio/dio.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:open_file/open_file.dart';
+import 'dart:io';
 class MedicalReportsScreen extends StatefulWidget {
   const MedicalReportsScreen({super.key});
 
@@ -38,9 +40,11 @@ class _MedicalReportsScreenState extends State<MedicalReportsScreen> {
     } catch (e) {
       if (!mounted) return;
       setState(() => _isLoading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to load reports: $e')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to load reports: $e')),
+        );
+      }
     }
   }
 
@@ -61,41 +65,67 @@ class _MedicalReportsScreenState extends State<MedicalReportsScreen> {
       await _loadReports();
       
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Report uploaded successfully')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Report uploaded successfully')),
+        );
+      }
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Upload failed: $e')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Upload failed: $e')),
+        );
+      }
     } finally {
       if (mounted) setState(() => _isUploading = false);
     }
   }
 
-  void _openReport(String fileUrl) {
-    final fullUrl = 'http://127.0.0.1:5000$fileUrl';
-    final Uri uri = Uri.parse(fullUrl);
-    _launchUrl(uri);
-  }
+  Future<void> _downloadAndOpenFile(String url) async {
+    try {
+      // Show loading indicator
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Opening file...')),
+      );
 
-  void _downloadReport(String fileUrl, String fileName) {
-    final fullUrl = 'http://127.0.0.1:5000$fileUrl';
-    final Uri uri = Uri.parse(fullUrl);
-    _launchUrl(uri);
-  }
+      // Download file with ngrok header
+      final response = await Dio().get(
+        url,
+        options: Options(
+          headers: {
+            'ngrok-skip-browser-warning': 'true',
+          },
+          responseType: ResponseType.bytes,
+        ),
+      );
 
-  Future<void> _launchUrl(Uri uri) async {
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    } else {
+      // Save to temporary directory
+      final tempDir = await getTemporaryDirectory();
+      final fileName = url.split('/').last.split('?').first;
+      final file = File('${tempDir.path}/$fileName');
+      await file.writeAsBytes(response.data);
+
+      // Open the file
+      await OpenFile.open(file.path);
+      
+    } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Could not open file')),
+          SnackBar(content: Text('Failed to open file: $e')),
         );
       }
     }
+  }
+
+  void _openReport(String fileUrl) {
+    final fullUrl = 'https://smashup-marshy-kindly.ngrok-free.dev$fileUrl';
+    _downloadAndOpenFile(fullUrl);
+  }
+
+  void _downloadReport(String fileUrl, String fileName) {
+    final fullUrl = 'https://smashup-marshy-kindly.ngrok-free.dev$fileUrl';
+    _downloadAndOpenFile(fullUrl);
   }
 
   String formatDate(String dateString) {

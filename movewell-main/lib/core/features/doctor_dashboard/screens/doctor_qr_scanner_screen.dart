@@ -306,7 +306,7 @@ class _DoctorQrScannerScreenState extends State<DoctorQrScannerScreen> {
                       width: 44,
                       height: 44,
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.15),
+                        color: Colors.black.withValues(alpha: 0.5),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: const Icon(
@@ -339,7 +339,7 @@ class _DoctorQrScannerScreenState extends State<DoctorQrScannerScreen> {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                 decoration: BoxDecoration(
-                  color: Colors.black.withValues(alpha: 0.6),
+                  color: Colors.black.withValues(alpha: 0.7),
                   borderRadius: BorderRadius.circular(24),
                 ),
                 child: Text(
@@ -365,120 +365,80 @@ class _DoctorQrScannerScreenState extends State<DoctorQrScannerScreen> {
         final left = (constraints.maxWidth - scanSize) / 2;
         final top = (constraints.maxHeight - scanSize) / 2 - 30;
 
-        return Stack(
-          children: [
-            ColorFiltered(
-              colorFilter: ColorFilter.mode(
-                Colors.black.withValues(alpha: 0.5),
-                BlendMode.srcOut,
+        return IgnorePointer(
+          child: Stack(
+            children: [
+              // Semi-transparent background with cutout
+              CustomPaint(
+                size: Size(constraints.maxWidth, constraints.maxHeight),
+                painter: _OverlayPainter(
+                  cutoutRect: Rect.fromLTWH(left, top, scanSize, scanSize),
+                ),
               ),
-              child: Stack(
-                children: [
-                  Container(
-                    decoration: const BoxDecoration(
-                      color: Colors.black,
-                      backgroundBlendMode: BlendMode.dstOut,
-                    ),
-                  ),
-                  Positioned(
-                    left: left,
-                    top: top,
-                    child: Container(
-                      width: scanSize,
-                      height: scanSize,
-                      decoration: BoxDecoration(
-                        color: Colors.red,
-                        borderRadius: BorderRadius.circular(24),
-                      ),
-                    ),
-                  ),
-                ],
+              // White corners
+              Positioned(
+                left: left,
+                top: top,
+                child: _buildCorner(isLeft: true, isTop: true),
               ),
-            ),
-            Positioned(
-              left: left - 2,
-              top: top - 2,
-              child: _buildCorner(true, true),
-            ),
-            Positioned(
-              right: left - 2,
-              top: top - 2,
-              child: _buildCorner(false, true),
-            ),
-            Positioned(
-              left: left - 2,
-              bottom: constraints.maxHeight - top - scanSize - 2,
-              child: _buildCorner(true, false),
-            ),
-            Positioned(
-              right: left - 2,
-              bottom: constraints.maxHeight - top - scanSize - 2,
-              child: _buildCorner(false, false),
-            ),
-          ],
+              Positioned(
+                right: constraints.maxWidth - left - scanSize,
+                top: top,
+                child: _buildCorner(isLeft: false, isTop: true),
+              ),
+              Positioned(
+                left: left,
+                bottom: constraints.maxHeight - top - scanSize,
+                child: _buildCorner(isLeft: true, isTop: false),
+              ),
+              Positioned(
+                right: constraints.maxWidth - left - scanSize,
+                bottom: constraints.maxHeight - top - scanSize,
+                child: _buildCorner(isLeft: false, isTop: false),
+              ),
+            ],
+          ),
         );
       },
     );
   }
 
-  Widget _buildCorner(bool isLeft, bool isTop) {
-    return SizedBox(
-      width: 32,
-      height: 32,
-      child: CustomPaint(
-        painter: _CornerPainter(
-          isLeft: isLeft,
-          isTop: isTop,
-          color: AppColors.primary,
+  Widget _buildCorner({required bool isLeft, required bool isTop}) {
+    return Container(
+      width: 30,
+      height: 30,
+      decoration: BoxDecoration(
+        border: Border(
+          top: isTop ? BorderSide(color: Colors.white, width: 4) : BorderSide.none,
+          left: isLeft ? BorderSide(color: Colors.white, width: 4) : BorderSide.none,
+          right: !isLeft ? BorderSide(color: Colors.white, width: 4) : BorderSide.none,
+          bottom: !isTop ? BorderSide(color: Colors.white, width: 4) : BorderSide.none,
         ),
       ),
     );
   }
 }
 
-class _CornerPainter extends CustomPainter {
-  final bool isLeft;
-  final bool isTop;
-  final Color color;
+class _OverlayPainter extends CustomPainter {
+  final Rect cutoutRect;
 
-  _CornerPainter({
-    required this.isLeft,
-    required this.isTop,
-    required this.color,
-  });
+  _OverlayPainter({required this.cutoutRect});
 
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = color
-      ..strokeWidth = 4
-      ..strokeCap = StrokeCap.round
-      ..style = PaintingStyle.stroke;
+    final RRect rRect = RRect.fromRectAndRadius(
+      cutoutRect, 
+      const Radius.circular(24) 
+    );
 
-    final path = Path();
-    if (isLeft && isTop) {
-      path.moveTo(0, size.height);
-      path.lineTo(0, 8);
-      path.quadraticBezierTo(0, 0, 8, 0);
-      path.lineTo(size.width, 0);
-    } else if (!isLeft && isTop) {
-      path.moveTo(0, 0);
-      path.lineTo(size.width - 8, 0);
-      path.quadraticBezierTo(size.width, 0, size.width, 8);
-      path.lineTo(size.width, size.height);
-    } else if (isLeft && !isTop) {
-      path.moveTo(0, 0);
-      path.lineTo(0, size.height - 8);
-      path.quadraticBezierTo(0, size.height, 8, size.height);
-      path.lineTo(size.width, size.height);
-    } else {
-      path.moveTo(size.width, 0);
-      path.lineTo(size.width, size.height - 8);
-      path.quadraticBezierTo(size.width, size.height, size.width - 8, size.height);
-      path.lineTo(0, size.height);
-    }
-
-    canvas.drawPath(path, paint);
+    canvas.drawPath(
+      Path.combine(
+        PathOperation.difference,
+        Path()..addRect(Rect.fromLTWH(0, 0, size.width, size.height)),
+        Path()..addRRect(rRect),
+      ),
+      Paint()..color = Colors.black.withValues(alpha: 0.6),
+    );
   }
 
   @override

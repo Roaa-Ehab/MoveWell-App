@@ -9,7 +9,7 @@ class ApiClient {
 
   ApiClient._internal() {
     dio = Dio(BaseOptions(
-      baseUrl: 'http://127.0.0.1:5000/api',
+      baseUrl: 'https://smashup-marshy-kindly.ngrok-free.dev/api',
       connectTimeout: const Duration(seconds: 30),
       receiveTimeout: const Duration(seconds: 30),
       headers: {
