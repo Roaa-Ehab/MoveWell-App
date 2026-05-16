@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:movewell/core/theme/colors.dart';
 import 'package:movewell/core/widgets/header_background.dart';
 import 'package:movewell/core/features/video_session/screens/waiting_room_screen.dart';
@@ -8,7 +7,10 @@ import 'package:movewell/core/services/agora_service.dart';
 import 'package:movewell/core/services/doctor_service.dart';
 import 'package:movewell/core/services/chat_service.dart';
 import 'package:movewell/core/features/chat/screens/doctor_chat_screen.dart';
-
+import 'package:dio/dio.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:open_file/open_file.dart';
+import 'dart:io';
 class DoctorPatientDetailScreen extends StatefulWidget {
   final Map<String, dynamic> patient;
 
@@ -87,22 +89,41 @@ class _DoctorPatientDetailScreenState extends State<DoctorPatientDetailScreen> {
   }
 
   void _openDocument(String fileUrl) {
-    final fullUrl = 'https://smashup-marshy-kindly.ngrok-free.dev$fileUrl';
-    final Uri uri = Uri.parse(fullUrl);
-    _launchUrl(uri);
-  }
+  final fullUrl = 'https://smashup-marshy-kindly.ngrok-free.dev$fileUrl';
+  _launchUrl(fullUrl);  // Pass String, not Uri
+}
 
-  Future<void> _launchUrl(Uri uri) async {
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    } else {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Could not open file')),
-        );
-      }
+  Future<void> _launchUrl(String url) async {
+  try {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Opening file...')),
+    );
+
+    final response = await Dio().get(
+      url,
+      options: Options(
+        headers: {
+          'ngrok-skip-browser-warning': 'true',
+        },
+        responseType: ResponseType.bytes,
+      ),
+    );
+
+    final tempDir = await getTemporaryDirectory();
+    final fileName = url.split('/').last.split('?').first;
+    final file = File('${tempDir.path}/$fileName');
+    await file.writeAsBytes(response.data);
+
+    await OpenFile.open(file.path);
+    
+  } catch (e) {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to open file: $e')),
+      );
     }
   }
+}
 
   Future<void> _loadHomeVisit() async {
     if (!mounted) return;

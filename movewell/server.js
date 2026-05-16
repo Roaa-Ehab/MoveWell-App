@@ -40,6 +40,7 @@ app.use("/api/users", require("./routes/userRoutes"));
 app.use("/uploads", express.static("uploads"));
 app.use("/api/reports", require("./routes/reportRoutes"));
 app.use("/api/clinical-notes", require("./routes/clinicalNoteRoutes"));
+app.use("/api/ai", require("./routes/aiRoutes"));
 app.get("/", (req, res) => {
   res.send("MoveWell API Running");
 });

@@ -3,7 +3,7 @@ const router = express.Router();
 const { getExercises, getExercisesByInjury, getExerciseById, createExercise, updateExercise, deleteExercise } = require("../controllers/exerciseController");
 const { protect, doctorOnly } = require("../middleware/authMiddleware");
 
-router.get("/", protect, getExercises);
+router.get("/", getExercises);
 router.get("/injury/:injuryType", protect, getExercisesByInjury);
 router.get("/:id", protect, getExerciseById);
 router.post("/", protect, doctorOnly, createExercise);

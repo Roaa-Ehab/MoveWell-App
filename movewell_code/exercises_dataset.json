@@ -1,0 +1,101 @@
+{
+  "neck": [
+    { "exercise_name": "Neck Tilt", "condition": "stiffness", "difficulty": "easy", "pain_level": "low", "duration": 5 },
+    { "exercise_name": "Neck Rotation", "condition": "mobility", "difficulty": "easy", "pain_level": "low", "duration": 5 },
+    { "exercise_name": "Chin Tuck", "condition": "posture", "difficulty": "easy", "pain_level": "low", "duration": 5 },
+    { "exercise_name": "Upper Trap Stretch", "condition": "strain", "difficulty": "easy", "pain_level": "low", "duration": 5 },
+    { "exercise_name": "Isometric Hold", "condition": "weak muscles", "difficulty": "medium", "pain_level": "medium", "duration": 5 },
+    { "exercise_name": "Resistance Band Neck", "condition": "strength", "difficulty": "medium", "pain_level": "medium", "duration": 8 },
+    { "exercise_name": "Head Retraction", "condition": "posture", "difficulty": "easy", "pain_level": "low", "duration": 5 }
+  ],
+
+  "shoulder": [
+    { "exercise_name": "Shoulder Flexion", "condition": "mobility", "difficulty": "easy", "pain_level": "low", "duration": 5 },
+    { "exercise_name": "Shoulder Abduction", "condition": "mobility", "difficulty": "easy", "pain_level": "low", "duration": 5 },
+    { "exercise_name": "Pendulum Exercise", "condition": "shoulder pain", "difficulty": "easy", "pain_level": "low", "duration": 5 },
+    { "exercise_name": "Wall Crawls", "condition": "frozen shoulder", "difficulty": "easy", "pain_level": "low", "duration": 5 },
+    { "exercise_name": "Lateral Raise", "condition": "strength", "difficulty": "easy", "pain_level": "low", "duration": 5 },
+    { "exercise_name": "Overhead Press", "condition": "strength", "difficulty": "medium", "pain_level": "medium", "duration": 10 },
+    { "exercise_name": "Scapular Retraction", "condition": "posture", "difficulty": "easy", "pain_level": "low", "duration": 5 }
+  ],
+
+  "arm": [
+    { "exercise_name": "Bicep Curl", "condition": "arm weakness", "difficulty": "easy", "pain_level": "low", "duration": 5 },
+    { "exercise_name": "Tricep Dip", "condition": "strength", "difficulty": "medium", "pain_level": "medium", "duration": 10 },
+    { "exercise_name": "Arm Circles", "condition": "warmup", "difficulty": "easy", "pain_level": "low", "duration": 5 },
+    { "exercise_name": "Resistance Band Pull", "condition": "strength", "difficulty": "medium", "pain_level": "medium", "duration": 10 },
+    { "exercise_name": "Wall Push Up", "condition": "rehab", "difficulty": "easy", "pain_level": "low", "duration": 5 },
+    { "exercise_name": "Hammer Curl", "condition": "arm strength", "difficulty": "medium", "pain_level": "medium", "duration": 5 },
+    { "exercise_name": "Wrist Flexion", "condition": "wrist rehab", "difficulty": "easy", "pain_level": "low", "duration": 5 }
+  ],
+
+  "wrist": [
+    { "exercise_name": "Wrist Flexion", "condition": "wrist pain", "difficulty": "easy", "pain_level": "low", "duration": 5 },
+    { "exercise_name": "Wrist Extension", "condition": "rehab", "difficulty": "easy", "pain_level": "low", "duration": 5 },
+    { "exercise_name": "Wrist Rotation", "condition": "mobility", "difficulty": "easy", "pain_level": "low", "duration": 5 },
+    { "exercise_name": "Grip Strength", "condition": "hand weakness", "difficulty": "easy", "pain_level": "low", "duration": 5 },
+    { "exercise_name": "Finger Stretch", "condition": "stiff fingers", "difficulty": "easy", "pain_level": "low", "duration": 5 },
+    { "exercise_name": "Wrist Curl", "condition": "strength", "difficulty": "medium", "pain_level": "medium", "duration": 8 },
+    { "exercise_name": "Pronation Supination", "condition": "mobility", "difficulty": "easy", "pain_level": "low", "duration": 5 }
+  ],
+
+  "back": [
+    { "exercise_name": "Cat-Cow Stretch", "condition": "lower back pain", "difficulty": "easy", "pain_level": "low", "duration": 5 },
+    { "exercise_name": "Child Pose", "condition": "muscle tension", "difficulty": "easy", "pain_level": "low", "duration": 5 },
+    { "exercise_name": "Pelvic Tilt", "condition": "lower back pain", "difficulty": "easy", "pain_level": "medium", "duration": 10 },
+    { "exercise_name": "Bridge Exercise", "condition": "weak core", "difficulty": "medium", "pain_level": "medium", "duration": 10 },
+    { "exercise_name": "Bird Dog", "condition": "core stability", "difficulty": "medium", "pain_level": "medium", "duration": 10 },
+    { "exercise_name": "Superman", "condition": "weak lower back", "difficulty": "medium", "pain_level": "medium", "duration": 8 },
+    { "exercise_name": "Plank", "condition": "core stability", "difficulty": "medium", "pain_level": "medium", "duration": 10 }
+  ],
+
+  "hip": [
+    { "exercise_name": "Hip Bridge", "condition": "weak glutes", "difficulty": "easy", "pain_level": "low", "duration": 10 },
+    { "exercise_name": "Clamshell", "condition": "hip stability", "difficulty": "easy", "pain_level": "low", "duration": 5 },
+    { "exercise_name": "Hip Abduction", "condition": "hip weakness", "difficulty": "easy", "pain_level": "low", "duration": 5 },
+    { "exercise_name": "Hip Flexor Stretch", "condition": "tight hip flexors", "difficulty": "easy", "pain_level": "low", "duration": 5 },
+    { "exercise_name": "Donkey Kicks", "condition": "glutes activation", "difficulty": "easy", "pain_level": "low", "duration": 5 },
+    { "exercise_name": "Lunges", "condition": "strength", "difficulty": "medium", "pain_level": "medium", "duration": 10 },
+    { "exercise_name": "Squats", "condition": "hip strength", "difficulty": "medium", "pain_level": "medium", "duration": 10 }
+  ],
+
+  "knee": [
+    { "exercise_name": "Knee Extension", "condition": "knee pain", "difficulty": "easy", "pain_level": "low", "duration": 5 },
+    { "exercise_name": "Straight Leg Raise", "condition": "ACL injury", "difficulty": "easy", "pain_level": "low", "duration": 10 },
+    { "exercise_name": "Hamstring Stretch", "condition": "tight muscles", "difficulty": "easy", "pain_level": "low", "duration": 5 },
+    { "exercise_name": "Quad Stretch", "condition": "muscle tightness", "difficulty": "easy", "pain_level": "low", "duration": 5 },
+    { "exercise_name": "Wall Squat", "condition": "weak muscles", "difficulty": "medium", "pain_level": "medium", "duration": 10 },
+    { "exercise_name": "Mini Squat", "condition": "knee stability", "difficulty": "easy", "pain_level": "low", "duration": 5 },
+    { "exercise_name": "Step Up", "condition": "rehabilitation", "difficulty": "medium", "pain_level": "medium", "duration": 10 }
+  ],
+
+  "leg": [
+    { "exercise_name": "Squat", "condition": "strength", "difficulty": "medium", "pain_level": "medium", "duration": 10 },
+    { "exercise_name": "Lunges", "condition": "strength", "difficulty": "medium", "pain_level": "medium", "duration": 10 },
+    { "exercise_name": "Calf Raise", "condition": "strength", "difficulty": "easy", "pain_level": "low", "duration": 5 },
+    { "exercise_name": "Step Up", "condition": "rehab", "difficulty": "medium", "pain_level": "medium", "duration": 10 },
+    { "exercise_name": "Hamstring Stretch", "condition": "tight muscles", "difficulty": "easy", "pain_level": "low", "duration": 5 },
+    { "exercise_name": "Glute Bridge", "condition": "core", "difficulty": "medium", "pain_level": "medium", "duration": 10 },
+    { "exercise_name": "Side Leg Raise", "condition": "hip", "difficulty": "easy", "pain_level": "low", "duration": 5 }
+  ],
+
+  "ankle": [
+    { "exercise_name": "Ankle Rotation", "condition": "stiffness", "difficulty": "easy", "pain_level": "low", "duration": 5 },
+    { "exercise_name": "Heel Raise", "condition": "weak calf", "difficulty": "easy", "pain_level": "low", "duration": 5 },
+    { "exercise_name": "Toe Raise", "condition": "balance", "difficulty": "easy", "pain_level": "low", "duration": 5 },
+    { "exercise_name": "Ankle Pump", "condition": "circulation", "difficulty": "easy", "pain_level": "low", "duration": 5 },
+    { "exercise_name": "Resistance Band Ankle", "condition": "rehab", "difficulty": "medium", "pain_level": "medium", "duration": 8 },
+    { "exercise_name": "Foot Circles", "condition": "mobility", "difficulty": "easy", "pain_level": "low", "duration": 5 },
+    { "exercise_name": "Calf Stretch", "condition": "tight muscles", "difficulty": "easy", "pain_level": "low", "duration": 5 }
+  ],
+
+  "full_body": [
+    { "exercise_name": "Walking", "condition": "general rehab", "difficulty": "easy", "pain_level": "low", "duration": 10 },
+    { "exercise_name": "Marching in Place", "condition": "mobility", "difficulty": "easy", "pain_level": "low", "duration": 5 },
+    { "exercise_name": "Sit to Stand", "condition": "strength", "difficulty": "easy", "pain_level": "low", "duration": 5 },
+    { "exercise_name": "Balance Stand", "condition": "stability", "difficulty": "easy", "pain_level": "low", "duration": 5 },
+    { "exercise_name": "Jumping Jack", "condition": "cardio", "difficulty": "medium", "pain_level": "medium", "duration": 5 },
+    { "exercise_name": "Mountain Climbers", "condition": "cardio", "difficulty": "medium", "pain_level": "medium", "duration": 5 },
+    { "exercise_name": "Stretching Routine", "condition": "flexibility", "difficulty": "easy", "pain_level": "low", "duration": 10 }
+  ]
+}
