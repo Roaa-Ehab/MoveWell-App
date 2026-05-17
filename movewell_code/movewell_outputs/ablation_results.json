@@ -1,0 +1,12 @@
+[
+  {
+    "approach": "Heuristic",
+    "accuracy": 0.95,
+    "f1": 0.9256
+  },
+  {
+    "approach": "ML only (RF)",
+    "accuracy": 0.95,
+    "f1": 0.9377
+  }
+]
